@@ -1,38 +1,73 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard{% endblock %}
 {% block content %}
-<div class="container">
-    <h1>Admin Dashboard</h1>
-    <p>Welcome to the admin dashboard. Here you can manage products, orders, and users.</p>
-    <h2 class='text-center text-warning'>Product list</h2>
-    <a  href="{%url 'addproduct'%}"class="btn btn-info">ADD PRODUCT</a>
-    <table class="table table-danger table-striped-columns">
-        <thead>
-            <tr>
-                <th>id</th>
-                <th>name</th>
-                <th>price</th>
-                <th>description</th>
-                <th>image</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {%for product in products%}
-            <tr>
-                <td>{{product.id}}</td>
-                <td>{{product.name}}</td>
-                <td>sh{{product.price}}</td>
-                <td>{{product.description}}</td>
-                <td><img src="{{product.image.url}}" alt="{{product.name}}" width="100"></td>
-                <td>
-                    <a href="{%url 'update' product.id %}" class="btn btn-sm btn-warning">Update</a>
-                    <a href="{%url 'delete' product.id %}" class="btn btn-sm btn-danger">Delete</a>
-                </td>   
-            </tr>
-            {%endfor%}
-        </tbody>
+<main class="container py-5 dashboard-page">
+    <header class="dashboard-heading">
+        <div>
+            <span class="dashboard-eyebrow">ESHOP MANAGEMENT</span>
+            <h1>Welcome, {{ request.user.username|default:"Admin" }}</h1>
+            <p>Manage your product catalogue in one place.</p>
+        </div>
+        <a href="{% url 'addproduct' %}" class="btn btn-primary add-product-btn">＋ Add product</a>
+    </header>
 
-    </table>
+    <section class="product-card" aria-labelledby="product-list-heading">
+        <div class="product-card-heading">
+            <div>
+                <h2 id="product-list-heading">Products</h2>
+                <p>All products in your store</p>
+            </div>
+            <span class="product-count">{{ products|length }} item{{ products|length|pluralize }}</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table product-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Price</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>
+                            <div class="product-info">
+                                {% if product.image %}
+                                <img class="product-thumbnail" src="{{ product.image.url }}" alt="{{ product.name }}">
+                                {% else %}
+                                <div class="product-thumbnail product-thumbnail-empty" aria-hidden="true">📦</div>
+                                {% endif %}
+                                <div>
+                                    <span class="product-name">{{ product.name }}</span>
+                                    <span class="product-id">Product #{{ product.id }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="product-description">{{ product.description|default:"No description provided." }}</td>
+                        <td><span class="product-price">KSh {{ product.price }}</span></td>
+                        <td>
+                            <div class="product-actions">
+                                <a href="{% url 'update' product.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="{% url 'delete' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-products">
+                            <div class="empty-products-icon" aria-hidden="true">📦</div>
+                            <strong>No products yet</strong>
+                            <p>Add your first product to see it listed here.</p>
+                            <a href="{% url 'addproduct' %}" class="btn btn-primary btn-sm">Add a product</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 </div>
 {%endblock%}

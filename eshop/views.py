@@ -7,7 +7,8 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 
 # Create your views here.
 def home(request):
-    return render(request, 'home.html')
+    products=Product.objects.all()
+    return render(request, 'home.html',{'products':products})
 #r-read-fetch records from db
 @user_passes_test(lambda u:u.is_staff,login_url='login')
 @login_required(login_url='login')

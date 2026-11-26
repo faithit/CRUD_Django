@@ -90,7 +90,10 @@ def login_user(request):
 @login_required(login_url='login')
 #navigates user to  dashboard
 def user_dashboard(request):
-    return render(request,'users/user_dashboard.html')
+    recent_products = Product.objects.order_by('-created_at')[:3]
+    return render(request, 'users/user_dashboard.html', {
+        'recent_products': recent_products,
+    })
 #logouts user
 def logout_user(request):
     logout(request)

@@ -1,9 +1,65 @@
 {% extends "base.html" %}
-{% block title %}User dashboard{% endblock %}
+{% block title %}Your Eshop dashboard{% endblock %}
 {% block content %}
-    <div class="container">
-        <h1>userdashboard</h1>
-        <h2>Welcome, {{ request.user.username|default:"User" }}</h2>
-       
+<main class="customer-dashboard">
+    <div class="customer-dashboard-inner">
+        <section class="customer-welcome" aria-labelledby="customer-welcome-title">
+            <div class="customer-welcome-copy">
+                <span class="customer-eyebrow">YOUR ESHOP SPACE</span>
+                <h1 id="customer-welcome-title">Welcome back, {{ request.user.first_name|default:request.user.username }}.</h1>
+                <p>Take a look around and find something good for your everyday.</p>
+                <a href="{% url 'home' %}#products" class="customer-primary-link">Explore the collection <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="customer-welcome-mark" aria-hidden="true">e</div>
+        </section>
+
+        <section class="customer-account-card" aria-label="Your account">
+            <div class="customer-account-avatar" aria-hidden="true">{{ request.user.username|first|upper }}</div>
+            <div class="customer-account-copy">
+                <span>Signed in as</span>
+                <strong>{{ request.user.username }}</strong>
+                <small>Member since {{ request.user.date_joined|date:"F Y" }}</small>
+            </div>
+            <a href="{% url 'logout' %}" class="customer-logout-link">Log out <span aria-hidden="true">↗</span></a>
+        </section>
+
+        <section class="customer-recent" aria-labelledby="customer-recent-title">
+            <div class="customer-section-heading">
+                <div>
+                    <span class="customer-section-kicker">FRESH FROM THE SHOP</span>
+                    <h2 id="customer-recent-title">Recently added</h2>
+                    <p>Have a look at what’s new in the collection.</p>
+                </div>
+                <a href="{% url 'home' %}#products" class="customer-view-all">View the shop <span aria-hidden="true">→</span></a>
+            </div>
+
+            {% if recent_products %}
+            <div class="store-product-grid">
+                {% for product in recent_products %}
+                <article class="store-product-card">
+                    <div class="store-product-image">
+                        {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">{% else %}<div class="product-image-placeholder" aria-hidden="true">✳</div>{% endif %}
+                        <span class="product-badge">NEW FIND</span>
+                    </div>
+                    <div class="store-product-info">
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.description|truncatechars:105 }}</p>
+                        <div class="store-product-bottom"><strong>KSh {{ product.price|floatformat:2 }}</strong><span aria-hidden="true">↗</span></div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="store-empty-state customer-empty-state">
+                <span aria-hidden="true">✳</span>
+                <h3>The collection is getting ready.</h3>
+                <p>Check back soon to see the latest finds.</p>
+                <a href="{% url 'home' %}" class="customer-view-all">Go to the shop <span aria-hidden="true">→</span></a>
+            </div>
+            {% endif %}
+        </section>
+
+        <footer class="customer-dashboard-footer"><span>Eshop</span><span>Thoughtful finds for everyday life.</span></footer>
     </div>
+</main>
 {% endblock %}

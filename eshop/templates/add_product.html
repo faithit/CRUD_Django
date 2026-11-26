@@ -1,21 +1,60 @@
 {% extends "base.html" %}
-{% block title %}Add Product{% endblock %}
+{% block title %}{% if form.instance.id %}Edit product{% else %}Add product{% endif %} | Eshop{% endblock %}
+{% block site_navigation %}{% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                {%if form.instance.id%}
-                <h2 class="text-center text-danger">Update Product</h2>
-                {%else%}
-                <h2 class="text-center text-warning">Add Product</h2>
-                {%endif%}
-                <form method="POST" class="card p-3 shadow" enctype="multipart/form-data">
-                    {%csrf_token%}
-                    {{form.as_p}}
-                    <button class="btn btn-warning" type="submit">
-                    {%if form.instance.id%}UPDATE PRODUCT{%else%}ADD PRODUCT{%endif%}</button>
-                </form>
+<div class="admin-shell">
+    <aside class="admin-sidebar" aria-label="Admin navigation">
+        <a class="admin-brand" href="{% url 'products' %}">
+            <span class="admin-brand-mark">e</span><span>Eshop</span><span class="brand-chevron" aria-hidden="true">⌄</span>
+        </a>
+        <nav class="admin-menu">
+            <a class="admin-menu-link" href="{% url 'home' %}"><span class="menu-icon" aria-hidden="true">⌂</span>Dashboard</a>
+            <a class="admin-menu-link" href="{% url 'products' %}"><span class="menu-icon" aria-hidden="true">▦</span>Products</a>
+            <a class="admin-menu-link is-active" href="{% url 'addproduct' %}" aria-current="page"><span class="menu-icon" aria-hidden="true">＋</span>Add product</a>
+            <a class="admin-menu-link" href="{% url 'user' %}"><span class="menu-icon" aria-hidden="true">♙</span>My account</a>
+        </nav>
+        <a class="admin-menu-link admin-logout" href="{% url 'logout' %}"><span class="menu-icon" aria-hidden="true">↪</span>Logout</a>
+    </aside>
+
+    <main class="admin-main dashboard-page">
+        <header class="admin-topbar">
+            <span class="product-editor-topbar-label">Store management</span>
+            <div class="admin-user"><span class="admin-avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span><span><strong>{{ request.user.username|default:"Admin" }}</strong><small>Administrator</small></span><span class="brand-chevron" aria-hidden="true">⌄</span></div>
+        </header>
+
+        <section class="admin-content product-editor-content">
+            <div class="admin-page-heading">
+                <div><p class="admin-breadcrumb">Products / {% if form.instance.id %}Edit product{% else %}Add product{% endif %}</p><h1>{% if form.instance.id %}Edit product{% else %}Add a product{% endif %}</h1></div>
+                <a href="{% url 'products' %}" class="editor-back-link">← Back to products</a>
             </div>
-        </div>
-        </div>
-{%endblock%}
+
+            <div class="product-editor-layout">
+                <section class="product-editor-card" aria-labelledby="product-editor-title">
+                    <div class="product-editor-heading">
+                        <span class="product-editor-icon" aria-hidden="true">＋</span>
+                        <div><h2 id="product-editor-title">Product details</h2><p>Fill in the information customers will see.</p></div>
+                    </div>
+                    <form method="POST" class="product-editor-form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        {{ form.as_p }}
+                        <div class="product-editor-actions">
+                            <a href="{% url 'products' %}" class="editor-cancel-button">Cancel</a>
+                            <button class="editor-save-button" type="submit">{% if form.instance.id %}Save changes{% else %}Add product{% endif %}</button>
+                        </div>
+                    </form>
+                </section>
+
+                <aside class="product-editor-tip">
+                    <span class="product-tip-icon" aria-hidden="true">✦</span>
+                    <span class="product-tip-eyebrow">A QUICK TIP</span>
+                    <h2>Make it easy to find.</h2>
+                    <p>Use a clear product name, a helpful description, and a bright image so shoppers can see what makes it special.</p>
+                    <div class="product-tip-rule"></div>
+                    <small>Before saving, double-check the price and selected image.</small>
+                </aside>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

@@ -1,27 +1,92 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}Eshop | Find your next favorite{% endblock %}
 {% block content %}
-    <div class="container">
-        <h1>Welcome to Eshop</h1>
-        
-        <h3 class="mb-4 text-success"> Featured products</h3>
-<div class="row">
-   
-        {%for  product in products%}
-        <div class="col-md-4 mb-4">
-            <div class="card product-card h-100">
-                    <img src="{{product.image.url}}" alt="product image">
-                    <div class="card-body">
-                        <h5 class="card-title">{{product.name}}</h5>
-                        <p class=card-text>{{product.description}}</p>
-                        <div class="mt-auto d-flex justify-content-between align-items-center">
-                        <strong>ksh{{product.price}}</strong>
-                        <a class="btn btn-outline-primary">view</a>
-                        </div>
-
-                    </div>
+<main class="storefront">
+    <section class="store-hero" aria-label="Featured products">
+        <div id="storeHeroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
+            {% if products %}
+            <div class="carousel-indicators">
+                {% for product in products|slice:":3" %}
+                <button type="button" data-bs-target="#storeHeroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+                {% endfor %}
             </div>
+            <div class="carousel-inner">
+                {% for product in products|slice:":3" %}
+                <article class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <div class="hero-slide">
+                        <div class="hero-copy">
+                            <span class="hero-kicker">CURATED FOR YOU</span>
+                            <h1>Meet your next favorite.</h1>
+                            <p>Discover {{ product.name }} and more finds picked for everyday life.</p>
+                            <a class="hero-cta" href="#products">Explore the collection <span aria-hidden="true">→</span></a>
+                        </div>
+                        <div class="hero-product">
+                            {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>{% endif %}
+                            <div class="hero-product-label"><span>FEATURED FIND</span><strong>{{ product.name }}</strong></div>
+                        </div>
+                        <span class="hero-orb hero-orb-one" aria-hidden="true"></span>
+                        <span class="hero-orb hero-orb-two" aria-hidden="true"></span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="carousel-inner">
+                <article class="carousel-item active">
+                    <div class="hero-slide hero-slide-empty">
+                        <div class="hero-copy">
+                            <span class="hero-kicker">WELCOME TO ESHOP</span>
+                            <h1>Good finds.<br>Right this way.</h1>
+                            <p>Browse the collection and find something you’ll love.</p>
+                            <a class="hero-cta" href="#products">Explore the collection <span aria-hidden="true">→</span></a>
+                        </div>
+                        <div class="hero-art" aria-hidden="true"><span>e</span></div>
+                    </div>
+                </article>
+            </div>
+            {% endif %}
+            {% if products|length > 1 %}
+            <button class="carousel-control-prev hero-control" type="button" data-bs-target="#storeHeroCarousel" data-bs-slide="prev" aria-label="Previous featured product"><span class="carousel-control-prev-icon" aria-hidden="true"></span></button>
+            <button class="carousel-control-next hero-control" type="button" data-bs-target="#storeHeroCarousel" data-bs-slide="next" aria-label="Next featured product"><span class="carousel-control-next-icon" aria-hidden="true"></span></button>
+            {% endif %}
         </div>
-        {%endfor%}
-    </div>
+    </section>
+
+    <section class="store-products" id="products">
+        <div class="store-section-heading">
+            <div>
+                <span class="section-kicker">THE COLLECTION</span>
+                <h2>Featured products</h2>
+                <p>A few good things we think you’ll like.</p>
+            </div>
+            <span class="collection-count">{{ products|length }} item{{ products|length|pluralize }}</span>
+        </div>
+
+        {% if products %}
+        <div class="store-product-grid">
+            {% for product in products %}
+            <article class="store-product-card">
+                <div class="store-product-image">
+                    {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">{% else %}<div class="product-image-placeholder" aria-hidden="true">✳</div>{% endif %}
+                    <span class="product-badge">A GOOD FIND</span>
+                </div>
+                <div class="store-product-info">
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description|truncatechars:105 }}</p>
+                    <div class="store-product-bottom"><strong>KSh {{ product.price|floatformat:2 }}</strong><span aria-hidden="true">↗</span></div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="store-empty-state">
+            <span aria-hidden="true">✳</span>
+            <h3>Your next favorite is on its way.</h3>
+            <p>Check back soon to see what’s new in the collection.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <footer class="store-footer"><span>Eshop</span><span>Thoughtful finds for everyday life.</span></footer>
+</main>
 {% endblock %}

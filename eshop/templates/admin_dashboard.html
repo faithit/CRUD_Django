@@ -1,73 +1,127 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Admin Dashboard{% endblock %}
+{% block site_navigation %}{% endblock %}
 {% block content %}
-<main class="container py-5 dashboard-page">
-    <header class="dashboard-heading">
-        <div>
-            <span class="dashboard-eyebrow">ESHOP MANAGEMENT</span>
-            <h1>Welcome, {{ request.user.username|default:"Admin" }}</h1>
-            <p>Manage your product catalogue in one place.</p>
-        </div>
-        <a href="{% url 'addproduct' %}" class="btn btn-primary add-product-btn">＋ Add product</a>
-    </header>
+<div class="admin-shell">
+    <aside class="admin-sidebar" aria-label="Admin navigation">
+        <a class="admin-brand" href="{% url 'products' %}">
+            <span class="admin-brand-mark">e</span><span>Eshop</span><span class="brand-chevron" aria-hidden="true">⌄</span>
+        </a>
+        <nav class="admin-menu">
+            <a class="admin-menu-link" href="{% url 'home' %}"><span class="menu-icon" aria-hidden="true">⌂</span>Dashboard</a>
+            <a class="admin-menu-link is-active" href="{% url 'products' %}" aria-current="page"><span class="menu-icon" aria-hidden="true">▦</span>Products</a>
+            <a class="admin-menu-link" href="{% url 'addproduct' %}"><span class="menu-icon" aria-hidden="true">＋</span>Add product</a>
+            <a class="admin-menu-link" href="{% url 'user' %}"><span class="menu-icon" aria-hidden="true">♙</span>My account</a>
+        </nav>
+        <a class="admin-menu-link admin-logout" href="{% url 'logout' %}"><span class="menu-icon" aria-hidden="true">↪</span>Logout</a>
+    </aside>
 
-    <section class="product-card" aria-labelledby="product-list-heading">
-        <div class="product-card-heading">
-            <div>
-                <h2 id="product-list-heading">Products</h2>
-                <p>All products in your store</p>
+    <main class="admin-main dashboard-page">
+        <header class="admin-topbar">
+            <label class="admin-global-search"><span aria-hidden="true">⌕</span><input type="search" id="global-product-search" placeholder="Search anything..." aria-label="Search products"></label>
+            <div class="admin-user"><span class="admin-avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span><span><strong>{{ request.user.username|default:"Admin" }}</strong><small>Administrator</small></span><span class="brand-chevron" aria-hidden="true">⌄</span></div>
+        </header>
+
+        <section class="admin-content">
+            <div class="admin-page-heading">
+                <div><p class="admin-breadcrumb">Store management</p><h1>Products</h1></div>
+                <a href="{% url 'addproduct' %}" class="admin-primary-button"><span aria-hidden="true">＋</span> Add Product</a>
             </div>
-            <span class="product-count">{{ products|length }} item{{ products|length|pluralize }}</span>
-        </div>
 
-        <div class="table-responsive">
-            <table class="table product-table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">Product</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Price</th>
-                        <th scope="col" class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in products %}
-                    <tr>
-                        <td>
-                            <div class="product-info">
-                                {% if product.image %}
-                                <img class="product-thumbnail" src="{{ product.image.url }}" alt="{{ product.name }}">
-                                {% else %}
-                                <div class="product-thumbnail product-thumbnail-empty" aria-hidden="true">📦</div>
-                                {% endif %}
-                                <div>
-                                    <span class="product-name">{{ product.name }}</span>
-                                    <span class="product-id">Product #{{ product.id }}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="product-description">{{ product.description|default:"No description provided." }}</td>
-                        <td><span class="product-price">KSh {{ product.price }}</span></td>
-                        <td>
-                            <div class="product-actions">
-                                <a href="{% url 'update' product.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
-                                <a href="{% url 'delete' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="empty-products">
-                            <div class="empty-products-icon" aria-hidden="true">📦</div>
-                            <strong>No products yet</strong>
-                            <p>Add your first product to see it listed here.</p>
-                            <a href="{% url 'addproduct' %}" class="btn btn-primary btn-sm">Add a product</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
+            <section class="analytics-grid" aria-label="Store analytics">
+                <article class="analytics-card">
+                    <span class="analytics-icon" aria-hidden="true">▦</span>
+                    <div><p>Total products</p><strong>{{ analytics.total_products|default:0 }}</strong><small>Products in your catalogue</small></div>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-icon" aria-hidden="true">KSh</span>
+                    <div><p>Catalog value</p><strong>KSh {{ analytics.catalog_value|default_if_none:0|floatformat:2 }}</strong><small>Sum of listed prices</small></div>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-icon" aria-hidden="true">↗</span>
+                    <div><p>Average price</p><strong>KSh {{ analytics.average_price|default_if_none:0|floatformat:2 }}</strong><small>Average listed product price</small></div>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-icon" aria-hidden="true">＋</span>
+                    <div><p>Added this week</p><strong>{{ analytics.added_last_7_days|default:0 }}</strong><small>Products added in the last 7 days</small></div>
+                </article>
+            </section>
+
+            <section class="product-card" aria-labelledby="product-list-heading">
+                <div class="product-card-heading">
+                    <div><h2 id="product-list-heading">All Products</h2><p>Manage your store catalogue</p></div>
+                    <div class="product-toolbar"><label class="product-search"><span aria-hidden="true">⌕</span><input type="search" id="table-product-search" placeholder="Search products..." aria-label="Filter products"></label><span class="product-count">{{ products|length }} item{{ products|length|pluralize }}</span></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table product-table align-middle mb-0">
+                        <thead><tr><th scope="col">Product</th><th scope="col">Description</th><th scope="col">Price</th><th scope="col" class="text-end">Actions</th></tr></thead>
+                        <tbody id="product-table-body">
+                            {% for product in products %}
+                            <tr data-product-row data-search="{{ product.name|lower }} {{ product.description|lower }} {{ product.price }}">
+                                <td><div class="product-info">{% if product.image %}<img class="product-thumbnail" src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<div class="product-thumbnail product-thumbnail-empty" aria-hidden="true">▧</div>{% endif %}<div><span class="product-name">{{ product.name }}</span><span class="product-id">Product #{{ product.id }}</span></div></div></td>
+                                <td class="product-description">{{ product.description|default:"No description provided."|truncatechars:90 }}</td>
+                                <td><span class="product-price">KSh {{ product.price|floatformat:2 }}</span></td>
+                                <td><div class="product-actions"><a href="{% url 'update' product.id %}" class="product-action" aria-label="Edit {{ product.name }}" title="Edit">✎</a><button type="button" class="product-action product-action-delete" aria-label="Delete {{ product.name }}" title="Delete" data-bs-toggle="modal" data-bs-target="#deleteProductModal" data-delete-url="{% url 'delete' product.id %}" data-product-name="{{ product.name }}">⌫</button></div></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="empty-products"><div class="empty-products-icon" aria-hidden="true">▧</div><strong>No products yet</strong><p>Add your first product to see it listed here.</p><a href="{% url 'addproduct' %}" class="admin-primary-button">Add a product</a></td></tr>
+                            {% endfor %}
+                            <tr id="no-search-results" hidden><td colspan="4" class="empty-products">No products match your search.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <footer class="product-card-footer"><span id="product-results-count">Showing {{ products|length }} product{{ products|length|pluralize }}</span></footer>
+            </section>
+        </section>
+    </main>
 </div>
-{%endblock%}
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content delete-confirmation-modal">
+            <div class="delete-modal-icon" aria-hidden="true">!</div>
+            <h2 id="deleteProductModalTitle">Delete this product?</h2>
+            <p>Are you sure you want to delete <strong id="deleteProductName"></strong>?</p>
+            <p class="delete-modal-note">This action cannot be undone.</p>
+            <div class="delete-modal-actions">
+                <button type="button" class="delete-cancel-button" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteProductForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-confirm-button">Delete product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (() => {
+        const inputs = [document.getElementById('global-product-search'), document.getElementById('table-product-search')].filter(Boolean);
+        const rows = [...document.querySelectorAll('[data-product-row]')];
+        const empty = document.getElementById('no-search-results');
+        const count = document.getElementById('product-results-count');
+        const filter = (value) => {
+            const query = value.trim().toLowerCase();
+            let shown = 0;
+            rows.forEach((row) => {
+                const match = row.dataset.search.includes(query);
+                row.hidden = !match;
+                if (match) shown += 1;
+            });
+            if (empty) empty.hidden = shown > 0 || rows.length === 0;
+            if (count) count.textContent = `Showing ${shown} product${shown === 1 ? '' : 's'}`;
+            inputs.forEach((input) => { if (input.value !== value) input.value = value; });
+        };
+        inputs.forEach((input) => input.addEventListener('input', () => filter(input.value)));
+
+        const deleteModal = document.getElementById('deleteProductModal');
+        const deleteForm = document.getElementById('deleteProductForm');
+        const deleteProductName = document.getElementById('deleteProductName');
+        document.querySelectorAll('[data-bs-target="#deleteProductModal"]').forEach((button) => {
+            button.addEventListener('click', () => {
+                deleteForm.action = button.dataset.deleteUrl;
+                deleteProductName.textContent = button.dataset.productName;
+            });
+        });
+    })();
+</script>
+{% endblock %}

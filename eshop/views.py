@@ -4,6 +4,10 @@ from .models import Product
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login,logout
 from django.contrib.auth.decorators import login_required,user_passes_test
+from django.db.models import Avg, Count, Sum
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your views here.
 def home(request):
@@ -14,7 +18,18 @@ def home(request):
 @login_required(login_url='login')
 def products(request):
     products=Product.objects.all()
-    return render(request, 'admin_dashboard.html',{'products':products})
+    analytics = Product.objects.aggregate(
+        total_products=Count('id'),
+        catalog_value=Sum('price'),
+        average_price=Avg('price'),
+    )
+    analytics['added_last_7_days'] = Product.objects.filter(
+        created_at__gte=timezone.now() - timedelta(days=7)
+    ).count()
+    return render(request, 'admin_dashboard.html',{
+        'products': products,
+        'analytics': analytics,
+    })
 #crud-c-create-add a record
 @user_passes_test(lambda u:u.is_staff,login_url='login')
 @login_required(login_url='login')
@@ -30,6 +45,7 @@ def add_product(request):
     #d-delete. delete a record from db
 @user_passes_test(lambda u:u.is_staff,login_url='login')
 @login_required(login_url='login')
+@require_POST
 def delete_product(request,id):
     product=get_object_or_404(Product,id=id)
     product.delete()
